@@ -11,7 +11,7 @@ const hind = Hind_Siliguri({
   variable: "--font-hind",
 });
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bazardors.vercel.app"),
+  metadataBase: new URL("https://bazardorBD.vercel.app"),
   applicationName: "বাজার দর",
   title: {
     default: "বাজার দর | নিত্যপণ্যের আজকের বাজারদর",

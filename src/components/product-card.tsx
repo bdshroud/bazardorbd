@@ -5,7 +5,7 @@ export function ChangeBadge({ product }: { product: Product }) {
   const d = product.change.dir;
   return (
     <span className={`badge ${d}`}>
-      {d === "up" ? "▲" : d === "down" ? "▼" : "•"}{" "}
+      {d === "up" ? "▲" : d === "down" ? "▼" : "—"}{" "}
       {bnNumber(Math.abs(product.change.pct))}%
     </span>
   );

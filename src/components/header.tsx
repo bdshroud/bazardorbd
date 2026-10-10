@@ -6,6 +6,8 @@ import { useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
+import type { Product } from "@/lib/types";
+import { bnNumber, unitLabel } from "@/lib/format";
 const subscribe = () => () => {};
 const getDate = () =>
   new Intl.DateTimeFormat("bn-BD", {
@@ -25,16 +27,25 @@ const categories = [
   ["dim-dui", "ডিম-দুধ"],
   ["mosla", "মসলা"],
 ];
-export function Header() {
+export function Header({ products }: { products: Product[] }) {
   const [open, setOpen] = useState(false);
   const date = useSyncExternalStore(subscribe, getDate, () => "আজকের বাজার");
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
   async function logout() {
-    await authClient.signOut();
-    toast.success("সফলভাবে সাইন আউট হয়েছে");
-    router.push("/");
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        toast.error(result.error.message || "সাইন আউট করা যায়নি");
+        return;
+      }
+      toast.success("সফলভাবে সাইন আউট হয়েছে");
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("সাইন আউট করা যায়নি। আবার চেষ্টা করুন");
+    }
   }
   return (
     <header className="site-header">
@@ -114,11 +125,28 @@ export function Header() {
           ))}
         </nav>
       )}
-      <div className="ticker">
-        <div>
-          🍚 মিনিকেট চাল ৯৯ টাকা/কেজি <em>▼ ২.৯%</em>　 🧅 পেঁয়াজ ৬৮ টাকা/কেজি{" "}
-          <b>▲ ৪.৬%</b>　 🥚 ডিম ১৫৮ টাকা/ডজন <b>▲ ৩.৯%</b>　 🧄 রসুন ১২৫
-          টাকা/কেজি <em>▼ ৭.৪%</em>　 🫚 আদা ৮৫ টাকা/কেজি <b>▲ ৯.০%</b>
+      <div className="ticker" aria-label="পণ্যের দামের চলমান তালিকা">
+        <div className="ticker-track">
+          {[0, 1].map((copy) => (
+            <div className="ticker-group" key={copy} aria-hidden={copy === 1}>
+              {products.length > 0 ? products.map((product) => (
+                <span className="ticker-item" key={`${copy}-${product.id}`}>
+                  <span aria-hidden="true">{product.image}</span>
+                  <span>{product.nameBn}</span>
+                  <span>{bnNumber(product.today)} টাকা/{unitLabel(product.unit).replace("প্রতি ", "")}</span>
+                  {product.change.dir === "flat" ? (
+                    <span className="ticker-flat">— {bnNumber(Math.abs(product.change.pct))}%</span>
+                  ) : product.change.dir === "up" ? (
+                    <b>▲ {bnNumber(Math.abs(product.change.pct))}%</b>
+                  ) : (
+                    <em>▼ {bnNumber(Math.abs(product.change.pct))}%</em>
+                  )}
+                </span>
+              )) : (
+                <span className="ticker-item">🛒 দামের তথ্য আপডেট করা হচ্ছে…</span>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </header>

@@ -60,7 +60,12 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   async function social(provider: "google" | "github") {
     setLoading(provider);
     try {
-      await authClient.signIn.social({ provider, callbackURL: "/" });
+      const result = await authClient.signIn.social({ provider, callbackURL: "/" });
+      if (result.error) {
+        toast.error(result.error.message || `${provider} দিয়ে সাইন ইন করা যায়নি`);
+      }
+    } catch {
+      toast.error(`${provider} দিয়ে সাইন ইন করা যায়নি। আবার চেষ্টা করুন`);
     } finally {
       setLoading(null);
     }
