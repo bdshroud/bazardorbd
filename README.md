@@ -152,14 +152,3 @@ npm run lint
 npm run build
 npm run start
 ```
-
-## Deployment Notes
-
-For Vercel deployment, add all values from `.env.example` in the project Environment Variables settings. MongoDB Atlas must allow the deployed application to connect. The production domain and OAuth callback URLs must match exactly.
-
-For Cloudflare, use the full-stack Next.js Workers or OpenNext runtime. This project is not a static export because it uses route handlers, MongoDB, and server-side authentication.
-
-## Author
-
-Kamrul: https://github.com/kamrullab
-# bazardorbd
