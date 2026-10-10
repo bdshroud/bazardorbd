@@ -138,8 +138,26 @@ main {
   display: flex;
   align-items: center;
 }
-.ticker div {
-  animation: marquee 25s linear infinite;
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+  will-change: transform;
+}
+.ticker-group {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 24px;
+  padding-right: 24px;
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ticker-flat {
+  color: #77827a;
 }
 .ticker b {
   color: var(--green-2);
@@ -150,10 +168,10 @@ main {
 }
 @keyframes marquee {
   from {
-    transform: translateX(100vw);
+    transform: translateX(0);
   }
   to {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }
 .hero {
@@ -2732,4 +2750,8 @@ textarea {
   .market-row:hover {
     box-shadow: 0 8px 24px rgba(23, 80, 43, 0.08);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
 }

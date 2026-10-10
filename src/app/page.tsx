@@ -1,95 +1,117 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown } from "lucide-react";
-import { getProducts } from "@/lib/products";
-import { ProductGrid } from "@/components/product-card";
-export default async function Home() {
-  const products = await getProducts();
-  const risers = products
-    .filter((p) => p.change.dir === "up")
-    .sort((a, b) => b.change.pct - a.change.pct)
-    .slice(0, 6);
-  const fallers = products
-    .filter((p) => p.change.dir === "down")
-    .sort((a, b) => a.change.pct - b.change.pct)
-    .slice(0, 6);
+import { notFound } from "next/navigation";
+import { MapPin, TrendingUp } from "lucide-react";
+import { getProduct } from "@/lib/products";
+import { bnNumber, unitLabel } from "@/lib/format";
+import { ChangeBadge } from "@/components/product-card";
+export default async function ProductDetails({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) notFound();
+  const min = Math.min(...product.markets.map((m) => m.min));
+  const max = Math.max(...product.markets.map((m) => m.max));
+  const avg = Math.round(
+    product.markets.reduce((s, m) => s + (m.min + m.max) / 2, 0) /
+      product.markets.length,
+  );
+  const shortUnit = unitLabel(product.unit).replace("প্রতি ", "");
   return (
-    <>
-      <section className="hero">
-        <div className="container hero-grid">
-          <div>
-            <span className="eyebrow">আজকের বাজার • এক নজরে</span>
-            <h1>
-              নিত্যপণ্যের সঠিক দাম,
-              <br />
-              <span>সিদ্ধান্ত হোক সহজ</span>
-            </h1>
-            <p>
-              চাল, ডাল, তেল, সবজি, মাছ, মাংস, ডিম ও মসলার দাম:
-              সর্বনিম্ন-সর্বাধিক এবং দামের পরিবর্তন এক জায়গায়।
-            </p>
-            <Link className="btn primary hero-btn" href="#all-products">
-              সব পণ্য দেখুন <ArrowDown size={18} />
-            </Link>
-            <div className="hero-stats">
-              <span>
-                <b>{products.length.toLocaleString("bn-BD")}</b> টি নিত্যদিনের
-                পণ্য
-              </span>
-              <span>
-                <b>১২</b> টি বাজার অন্তর্ভুক্ত
-              </span>
-              <span>
-                <b>৮</b> টি বিভাগের তথ্য
-              </span>
-            </div>
-          </div>
-          <div className="hero-art">
-            <span className="orb one" />
-            <span className="orb two" />
-            <Image
-              src="/assets/bazar-hero.png"
-              width={430}
-              height={430}
-              alt="বাজারের পণ্যের ঝুড়ি"
-              priority
-            />
+    <section className="container section detail-page">
+      <nav className="breadcrumbs" aria-label="Breadcrumb">
+        <Link href="/">হোম</Link>
+        <span aria-hidden="true">›</span>
+        <Link href={"/category/" + product.category}>
+          {product.categoryNameBn}
+        </Link>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">{product.nameBn}</span>
+      </nav>
+      <div className="detail-hero">
+        <div className="detail-emoji">{product.image}</div>
+        <div>
+          <span className="tag">
+            {product.categoryIcon} {product.categoryNameBn}
+          </span>
+          <h1>{product.nameBn}</h1>
+          <p>
+            গতকালের তুলনায় আজ দাম{" "}
+            {product.change.dir === "up"
+              ? "বেড়েছে"
+              : product.change.dir === "down"
+                ? "কমেছে"
+                : "অপরিবর্তিত"}
+            । বাজারভিত্তিক বিস্তারিত তথ্য নিচে দেখুন।
+          </p>
+          <div className="detail-meta">
+            <span>{unitLabel(product.unit)}</span>
+            <ChangeBadge product={product} />
           </div>
         </div>
-      </section>
-      <section className="container section">
+        <div className={"detail-today " + product.change.dir}>
+          <span>আজকের দাম</span>
+          <strong>{bnNumber(product.today)}</strong>
+          <small>টাকা / {shortUnit}</small>
+          <ChangeBadge product={product} />
+        </div>
+      </div>
+      <div className="summary">
+        <article className="summary-min">
+          <small>সর্বনিম্ন দাম</small>
+          <strong>{bnNumber(min)} টাকা</strong>
+          <span>সবচেয়ে কম দামের বাজার</span>
+        </article>
+        <article className="summary-max">
+          <small>সর্বাধিক দাম</small>
+          <strong>{bnNumber(max)} টাকা</strong>
+          <span>সবচেয়ে বেশি দামের বাজার</span>
+        </article>
+        <article className="featured">
+          <small>গড় দাম</small>
+          <strong>{bnNumber(avg)} টাকা</strong>
+          <span>
+            <TrendingUp size={15} /> আজকের বাজার গড়
+          </span>
+        </article>
+      </div>
+      <div className="market-section">
         <div className="section-heading">
           <div>
-            <span className="kicker up">▲ মূল্য বৃদ্ধি</span>
-            <h2>আজ দাম বেড়েছে</h2>
+            <span className="kicker">⚖️ বাজার তুলনা</span>
+            <h2>বাজারভিত্তিক আজকের দাম</h2>
           </div>
         </div>
-        <ProductGrid products={risers} />
-      </section>
-      <section className="section soft">
-        <div className="container">
-          <div className="section-heading">
-            <div>
-              <span className="kicker down">▼ মূল্য হ্রাস</span>
-              <h2>আজ দাম কমেছে</h2>
+        <div className="market-table">
+          <div className="market-head">
+            <span>বাজার</span>
+            <span>বিভাগ</span>
+            <span>সর্বনিম্ন</span>
+            <span>সর্বাধিক</span>
+            <span>গড়</span>
+          </div>
+          {product.markets.map((m) => (
+            <div className="market-row" key={`${m.market}-${m.division}`}>
+              <b data-label="বাজার">
+                <MapPin size={16} />
+                {m.market}
+              </b>
+              <span data-label="বিভাগ">{m.division}</span>
+              <span className="market-min" data-label="সর্বনিম্ন">
+                {bnNumber(m.min)} টাকা
+              </span>
+              <strong className="market-max" data-label="সর্বাধিক">
+                {bnNumber(m.max)} টাকা
+              </strong>
+              <span className="market-average" data-label="গড়">
+                {bnNumber(Math.round((m.min + m.max) / 2))} টাকা
+              </span>
             </div>
-          </div>
-          <ProductGrid products={fallers} />
+          ))}
         </div>
-      </section>
-      <section id="all-products" className="container section">
-        <div className="section-heading">
-          <div>
-            <span className="kicker">পণ্যের তালিকা</span>
-            <h2>সব পণ্য</h2>
-            <p>
-              মোট {products.length.toLocaleString("bn-BD")}টি পণ্যের আজকের দাম ও
-              পরিবর্তন
-            </p>
-          </div>
-        </div>
-        <ProductGrid products={products} />
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

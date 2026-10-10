@@ -1,6 +1,6 @@
 import type { Category, Product } from "./types";
-const BASE_URL = "https://api.api-store.workers.dev/api/bazardor";
-const FALLBACK_URL = "https://api.abcz.workers.dev/api/bazardor";
+const BASE_URL = "https://openapi.programming-hero.com/api/bazardor";
+const FALLBACK_URL = "https://openapi.programming-hero.com/api/bazardor";
 async function request<T>(path: string): Promise<T> {
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
