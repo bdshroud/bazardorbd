@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/bazardor";
+const uri = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/bazardorBD";
 
 const globalMongo = globalThis as unknown as {
   mongoClient?: MongoClient;

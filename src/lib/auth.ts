@@ -3,7 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { db } from "./mongodb";
 
 const isProduction = process.env.NODE_ENV === "production";
-const productionURL = "https://bazardors.vercel.app";
+const productionURL = "https://bazardorBD.vercel.app";
 const baseURL =
   process.env.BETTER_AUTH_URL ??
   (isProduction ? productionURL : "http://localhost:3000");
